@@ -7,9 +7,7 @@ import aiida_gudhi.tests as gt
 
 class TestRips(gt.PluginTestCase):
     def setUp(self):
-        self.computer = gt.get_localhost_computer().store()
-        self.code = gt.get_code(
-            plugin='gudhi.rdm', computer=self.computer).store()
+        self.code = gt.get_code(entry_point='gudhi.rdm')
 
     def test_submit_rips(self):
         """Test submitting a calculation"""

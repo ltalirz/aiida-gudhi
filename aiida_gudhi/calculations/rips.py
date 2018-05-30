@@ -89,7 +89,7 @@ class RipsDistanceMatrixCalculation(JobCalculation):
             if not isinstance(distance_matrix, SinglefileData):
                 raise InputValidationError(
                     "distance_matrix not of type SinglefileData")
-            remote_folder = None
+            symlink = None
 
         except KeyError:
             distance_matrix = None

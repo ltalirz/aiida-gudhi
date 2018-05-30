@@ -1,45 +1,38 @@
 #!/usr/bin/env runaiida
 # -*- coding: utf-8 -*-
-import sys
 import os
 import click
 
 
 @click.command('cli')
-@click.argument('codename')
-@click.argument('computer_name')
+@click.argument('codelabel')
 @click.option('--submit', is_flag=True, help='Actually submit calculation')
-def main(codename, computer_name, submit):
+def main(codelabel, submit):
     """Command line interface for testing and submitting calculations.
 
-    Usage: ./cli.py CODENAME COMPUTER_NAME
-    
-    CODENAME       from "verdi code setup"
-
-    COMPUTER_NAME  from "verdi computer setup"
-
     This script extends submit.py, adding flexibility in the selected code/computer.
+
+    Run './cli.py --help' to see options.
     """
-    from aiida.common.exceptions import NotExistent
-
-    code = Code.get_from_string(codename)
-    computer = Computer.get(computer_name)
-
-    # Prepare input parameters
-    MultiplyParameters = DataFactory('gudhi.factors')
-    parameters = MultiplyParameters(x1=2, x2=3)
+    code = Code.get_from_string(codelabel)
 
     # set up calculation
     calc = code.new_calc()
-    calc.label = "aiida_gudhi computes 2*3"
-    calc.description = "Test job submission with the aiida_gudhi plugin"
-    calc.set_max_wallclock_seconds(30 * 60)  # 30 min
-    # This line is only needed for local codes, otherwise the computer is
-    # automatically set from the code
-    calc.set_computer(computer)
+    calc.label = "compute rips from distance matrix"
+    calc.set_max_wallclock_seconds(1 * 60)
     calc.set_withmpi(False)
-    calc.set_resources({"num_machines": 1})
+    calc.set_resources({"num_machines": 1, "num_mpiprocs_per_machine": 1})
+
+    # Prepare input parameters
+    from aiida.orm import DataFactory
+    Parameters = DataFactory('gudhi.rdm')
+    parameters = Parameters(dict={'max-edge-length': 4.2})
     calc.use_parameters(parameters)
+
+    SinglefileData = DataFactory('singlefile')
+    distance_matrix = SinglefileData(
+        file=os.path.join(gt.TEST_DIR, 'sample_distance.matrix'))
+    calc.use_distance_matrix(distance_matrix)
 
     if submit:
         calc.store_all()

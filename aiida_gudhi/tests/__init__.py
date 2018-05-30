@@ -22,18 +22,25 @@ def get_path_to_executable(executable):
     return path
 
 
-def get_localhost_computer():
+def get_computer(name='localhost'):
     """Setup localhost computer"""
     from aiida.orm import Computer
-    import tempfile
-    computer = Computer(
-        name='localhost',
-        description='my computer',
-        hostname='localhost',
-        workdir=tempfile.mkdtemp(),
-        transport_type='local',
-        scheduler_type='direct',
-        enabled_state=True)
+    from aiida.common.exceptions import NotExistent
+
+    try:
+        computer = Computer.get(name)
+    except NotExistent:
+
+        import tempfile
+        computer = Computer(
+            name=name,
+            description='localhost computer set up by aiida_gudhi tests',
+            hostname='localhost',
+            workdir=tempfile.mkdtemp(),
+            transport_type='local',
+            scheduler_type='direct',
+            enabled_state=True)
+        computer.store()
 
     return computer
 
@@ -43,17 +50,24 @@ executables = {
 }
 
 
-def get_code(plugin, computer):
+def get_code(entry_point, computer_name='localhost'):
     """Setup code on localhost computer"""
     from aiida.orm import Code
+    from aiida.common.exceptions import NotExistent
 
-    executable = executables[plugin]
-    path = get_path_to_executable(executable)
-    code = Code(
-        input_plugin_name=plugin,
-        remote_computer_exec=[computer, path],
-    )
-    code.label = executable
+    computer = get_computer(computer_name)
+    executable = executables[entry_point]
+
+    try:
+        code = Code.get_from_string('{}@{}'.format(executable, computer_name))
+    except NotExistent:
+        path = get_path_to_executable(executable)
+        code = Code(
+            input_plugin_name=entry_point,
+            remote_computer_exec=[computer, path],
+        )
+        code.label = executable
+        code.store()
 
     return code
 
