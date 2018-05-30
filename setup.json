@@ -1,0 +1,43 @@
+{
+    "name": "aiida-gudhi",
+    "author": "Leopold Talirz",
+    "author_email": "leopold.talirz@gmail.com",
+    "description": "AiiDA plugin for the [GUDHI](http://gudhi.gforge.inria.fr/) library for topological data analysis.",
+    "url": "https://github.com/ltalirz/aiida-gudhi",
+    "license": "MIT",
+    "classifiers": [
+        "Programming Language :: Python"
+    ],
+    "version": "0.1-alpha",
+    "entry_points": {
+        "aiida.calculations": [
+            "gudhi.rdm = aiida_gudhi.calculations.rips:RipsDistanceMatrixCalculation"
+        ],
+        "aiida.parsers": [
+            "gudhi.rdm = aiida_gudhi.parsers.rips:RipsParser"
+        ],
+        "aiida.data": [
+            "gudhi.rdm = aiida_gudhi.data.rips:RipsDistanceMatrixParameters"
+        ]
+    },
+    "scripts": ["examples/cli.py"],
+    "setup_requires": ["reentry"],
+    "reentry_register": true,
+    "install_requires": [
+        "aiida >= 0.11"
+    ],
+    "extras_require": {
+        "testing": [
+            "aiida-core[testing]"
+        ],
+        "pre-commit": [
+            "pre-commit",
+            "yapf",
+            "prospector",
+            "pylint"
+        ],
+        "docs": [
+            "sphinx"
+        ]
+    }
+}
