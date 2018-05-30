@@ -52,9 +52,9 @@ class RipsDistanceMatrixParameters(ParameterData):
 
         pm_dict = self.get_dict()
         for k, v in pm_dict.iteritems():
-            parameters.append([k, v])
+            parameters += ['--' + k, v]
 
-        parameters.append([distance_matrix_file_name])
+        parameters += [distance_matrix_file_name]
 
         return map(str, parameters)
 
@@ -64,6 +64,6 @@ class RipsDistanceMatrixParameters(ParameterData):
         return [self.get_dict()['output-file']]
 
     @property
-    def output_keys(self):
+    def output_links(self):
         """Return list of output link names"""
         return ['output-file']

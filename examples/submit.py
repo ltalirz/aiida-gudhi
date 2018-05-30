@@ -5,31 +5,48 @@ Usage: verdi run submit.py
 
 Note: This script assumes you have set up computer and code as in README.md.
 """
+import aiida_gudhi.tests as gt
 import os
 
-# use code name specified using 'verdi code setup'
-code = Code.get_from_string('aiida_gudhi')
 
-# use computer name specified using 'verdi computer setup'
-computer = Computer.get('localhost')
+class TestRips():
+    def setUp(self):
+        try:
+            self.computer = Computer.get('localhost')
+        except NotExistent:
+            self.computer = gt.get_localhost_computer().store()
 
-# Prepare input parameters
-MultiplyParameters = DataFactory('gudhi.factors')
-parameters = MultiplyParameters(x1=2, x2=3)
+        self.code = gt.get_code(
+            plugin='gudhi.rdm', computer=self.computer).store()
 
-# set up calculation
-calc = code.new_calc()
-calc.label = "aiida_gudhi computes 2*3"
-calc.description = "Test job submission with the aiida_gudhi plugin"
-calc.set_max_wallclock_seconds(30 * 60)  # 30 min
-# This line is only needed for local codes, otherwise the computer is
-# automatically set from the code
-calc.set_computer(computer)
-calc.set_withmpi(False)
-calc.set_resources({"num_machines": 1})
-calc.use_parameters(parameters)
+    def test_submit_rips(self):
+        """Test submitting a calculation"""
+        code = self.code
 
-calc.store_all()
-calc.submit()
-print("submitted calculation; calc=Calculation(uuid='{}') # ID={}"\
-        .format(calc.uuid,calc.dbnode.pk))
+        # set up calculation
+        calc = code.new_calc()
+        calc.label = "compute rips from distance matrix"
+        calc.set_max_wallclock_seconds(1 * 60)
+        calc.set_withmpi(False)
+        calc.set_resources({"num_machines": 1, "num_mpiprocs_per_machine": 1})
+
+        # Prepare input parameters
+        from aiida.orm import DataFactory
+        Parameters = DataFactory('gudhi.rdm')
+        parameters = Parameters(dict={'max-edge-length': 4.2})
+        calc.use_parameters(parameters)
+
+        SinglefileData = DataFactory('singlefile')
+        distance_matrix = SinglefileData(
+            file=os.path.join(gt.TEST_DIR, 'sample_distance.matrix'))
+        calc.use_distance_matrix(distance_matrix)
+
+        calc.store_all()
+        calc.submit()
+        #calc.submit_test(folder=gt.get_temp_folder())
+
+
+t = TestRips()
+
+t.setUp()
+t.test_submit_rips()
