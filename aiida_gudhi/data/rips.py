@@ -76,4 +76,4 @@ class RipsDistanceMatrixParameters(ParameterData):
     @property
     def output_links(self):
         """Return list of output link names"""
-        return ['output-file']
+        return ['rips_complex']
