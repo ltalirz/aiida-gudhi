@@ -8,7 +8,7 @@
     "classifiers": [
         "Programming Language :: Python"
     ],
-    "version": "0.1.0a",
+    "version": "0.1.0a2",
     "entry_points": {
         "aiida.calculations": [
             "gudhi.rdm = aiida_gudhi.calculations.rips:RipsDistanceMatrixCalculation"
